@@ -51,7 +51,6 @@ public class MemberController {
     @GetMapping("/members/list")
     public String findAll(Model model) {
         List<MemberDTO> memberDTOList = memberService.findAll();
-        // 어떠한 html로 가져갈 데이터가 있다면 model 사용
         model.addAttribute("memberList", memberDTOList);
         return "/members/list";
 
