@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Main Page</title>
+</head>
+<body>
+<h1>Main Page</h1>
+<hr>
+<h2>Welcome!</h2>
+<button th:onclick="|location.href='@{board}'|">게시판</button>
+
+<div sec:authorize="isAnonymous()">
+    <button th:onclick="|location.href='@{loginForm}'|">로그인</button>
+</div>
+
+<div sec:authorize="isAuthenticated()" style="padding:1em;">
+    <button th:onclick="|location.href='@{user}'|">마이페이지</button>
+    <form action="/logout" method="post">
+        <button type="submit">로그아웃</button>
+    </form>
+</div>
+
+<button sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')" th:onclick="|location.href='@{manager}'|">Manager</button><br>
+<button sec:authorize="hasRole('ROLE_ADMIN')" th:onclick="|location.href='@{admin}'|">Admin</button>
+
+
+</body>
+</html>

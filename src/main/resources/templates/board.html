@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>HomePage</title>
+    <title>Board Page</title>
 </head>
 <body>
-<h1>HomePage</h1>
+<h1>Board Page</h1>
 <hr>
-<h2>Welcome!</h2>
-<a href="/loginForm">로그인하기</a>
+<button th:onclick="|location.href='@{/}'|">홈으로</button>
 </body>
 </html>

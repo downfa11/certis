@@ -7,38 +7,23 @@
 <body>
 <h1>Login Page</h1>
 <hr/>
+<button th:onclick="|location.href='@{/}'|">홈으로</button>
+<!--<h2>로그인 유저 : </h2>-->
+<!--<p sec:authentication="principal"></p>-->
 
-<h2>로그인 유저 : </h2>
-<p sec:authentication="principal"></p>
-
-<div sec:authorize="isAnonymous()" style="padding:1em;">
-    <form action="/login" method="post" >
+<div sec:authorize="isAnonymous()">
+<!--    <form action="/login" method="post" >-->
 <!--        <input type="text" name="username" />-->
 <!--        <input type="password" name="password" />-->
 <!--        <button type="submit">로그인</button>-->
-    </form>
-
-    <a href="/oauth2/authorization/google">구글 로그인</a>
-    <br><br>
-
+<!--    </form>-->
+    <button th:onclick="|location.href='@{oauth2/authorization/google}'|">구글 로그인</button>
     <!--    <a href="/joinForm">회원가입</a><br>-->
 </div>
 
-<div sec:authorize="isAuthenticated()" style="padding:1em;">
-    <form action="/logout" method="post">
-        <button type="submit">로그아웃</button>
-    </form>
-</div>
-
-<br><br>
-<a href="/user">USER</a><br>
-<a href="/manager" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')">MANAGER</a><br>
-<a href="/admin" sec:authorize="hasRole('ROLE_ADMIN')">ADMIN</a><br>
-
-<br><br>
 <!--<a href="/form/loginInfo">Form 로그인 정보</a>-->
-<a href="/oauth/loginInfo">OAuth2 로그인 정보</a>
-<a href="/loginInfo">로그인 정보</a>
+<!--<a href="/oauth/loginInfo">OAuth2 로그인 정보</a>-->
+<!--<a href="/loginInfo">로그인 정보</a>-->
 
 </body>
 </html>

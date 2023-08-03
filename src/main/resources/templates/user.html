@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>User Page</title>
+</head>
+<body>
+<h1>User Page</h1>
+<hr>
+<button th:onclick="|location.href='@{/}'|">홈으로</button>
+<p sec:authentication="principal"></p>
+
+<div sec:authorize="isAuthenticated()">
+    <p th:text="'User Email :' + ${email}"></p>
+    <p th:text="'name :' + ${name}"></p>
+</div>
+</body>
+</html>

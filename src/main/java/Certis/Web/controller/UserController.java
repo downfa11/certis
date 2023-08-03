@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,8 +20,7 @@ import java.util.Map;
 
 @Controller
 public class UserController {
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
     @Autowired private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @GetMapping("/loginForm")
@@ -46,24 +46,42 @@ public class UserController {
 
     @GetMapping("/logout")
     public String logout() {
-        return "/home";
+        return "index";
     }
 
     @GetMapping("/user")
-    @ResponseBody
-    public String user(){
+    public String user(Authentication authentication, @AuthenticationPrincipal OAuth2User oAuth2UserPrincipal, Model model){
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        System.out.println(attributes);
+
+        model.addAttribute("email", attributes.get("email"));
+        model.addAttribute("name", attributes.get("name"));
+
         return "user";
     }
 
     @GetMapping("/manager")
-    @ResponseBody
-    public String manager(){
+    public String manager(Authentication authentication, @AuthenticationPrincipal OAuth2User oAuth2UserPrincipal, Model model){
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        System.out.println(attributes);
+
+        model.addAttribute("email", attributes.get("email"));
+        model.addAttribute("name", attributes.get("name"));
+
         return "manager";
     }
 
     @GetMapping("/admin")
-    @ResponseBody
-    public String admin(){
+    public String admin(Authentication authentication, @AuthenticationPrincipal OAuth2User oAuth2UserPrincipal, Model model){
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        System.out.println(attributes);
+
+        model.addAttribute("email", attributes.get("email"));
+        model.addAttribute("name", attributes.get("name"));
+
         return "admin";
     }
 
@@ -110,4 +128,11 @@ public class UserController {
         }
         return result;
     }
+
+    @GetMapping("/board")
+    public String board() {
+        return "board";
+    }
+
+
 }
