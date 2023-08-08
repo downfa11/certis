@@ -22,21 +22,19 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-
     - name: Make application.properties
       run: |
         cd ./src/main/resources
         touch ./application.properties
-          
         echo "${{ secrets.DATABASE_PROPERTIES }}" >> ./application.properties
-        shell: bash
+      shell: bash
           
     - name: Setup MySQL
       uses: mirromutth/mysql-action@v1.1
       with:
-        mysql database: 'test' 
-        mysql user: 'test'
-        mysql password: ${{ secrets.MYSQL_PASSWORD }}
+        mysql-database: 'test' 
+        mysql-user: 'test0'
+        mysql-password: ${{ secrets.MYSQL_PASSWORD }}
         
     - name: Run chmod to make gradlew executable
       run: chmod +x ./gradlew
