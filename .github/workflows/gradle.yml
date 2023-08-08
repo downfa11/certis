@@ -32,6 +32,7 @@ jobs:
     - name: Setup MySQL
       uses: mirromutth/mysql-action@v1.1
       with:
+        mysql-root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         mysql-database: 'test' 
         mysql-user: 'test0'
         mysql-password: ${{ secrets.MYSQL_PASSWORD }}
