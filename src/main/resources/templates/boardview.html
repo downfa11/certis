@@ -8,7 +8,31 @@
 
 <h1 th:text="${board.title}">제목입니다.</h1>
 <p th:text="${board.content}">내용이 들어갈 부분입니다.</p>
-<a th:href="@{/board/modify/{id}(id = ${board.id})}">수정</a>
-<a th:href="@{/board/delete(id = ${board.id})}">삭제</a>
+<a th:if="${isAuthor}" th:href="@{/board/modify/{id}(id=${board.id})}">수정</a>
+<a th:if="${isAuthor}" th:href="@{/board/delete(id = ${board.id})}">삭제</a>
+
+<h2>댓글</h2>
+<ul>
+    <li th:each="comment : ${comments}">
+        <p th:text="${comment.content}"></p>
+        <a th:if="${commentAuthorMap[comment.id]}" th:href="@{view/{id}/modify-comment/{commentId}(id=${board.id}, commentId=${comment.id})}">수정</a>
+        <a th:if="${commentAuthorMap[comment.id]}" th:href="@{view/{id}/delete-comment/{commentId}(id=${board.id}, commentId=${comment.id})}">삭제</a>
+
+        <div th:if="${commentAuthorMap[comment.id] and curComment != null and comment.id == curComment.id}">
+            <form th:action="@{/board/view/{id}/modify-comment/{commentId}(id=${board.id}, commentId=${comment.id})}" method="post">
+                <textarea name="content" rows="3" cols="50" th:text="${comment.content}"></textarea>
+                <br>
+                <button type="submit">댓글 수정</button>
+            </form>
+        </div>
+    </li>
+</ul>
+
+<h3>새 댓글 작성</h3>
+<form th:action="@{view/{id}/post-comment(id=${board.id})}" method="post">
+    <textarea name="content" rows="3" cols="50"></textarea>
+    <br>
+    <button type="submit">댓글 작성</button>
+</form>
 </body>
 </html>

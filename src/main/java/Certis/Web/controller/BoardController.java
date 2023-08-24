@@ -1,12 +1,18 @@
 package Certis.Web.controller;
 import Certis.Web.Service.BoardService;
+import Certis.Web.Service.CommentService;
 import Certis.Web.auth.PrincipalDetails;
 import Certis.Web.entity.BoardTable;
+import Certis.Web.entity.Comment;
 import Certis.Web.entity.Role;
 import Certis.Web.entity.User;
+import Certis.Web.repository.BoardRepository;
+import Certis.Web.repository.CommentRepository;
+import Certis.Web.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,19 +20,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
+
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Controller
 
 public class BoardController {
-
+    @Autowired
+    private CommentRepository commentRepository;
     @Autowired
     private BoardService boardService;
+    @Autowired
+    private CommentService commentService;
+    @Autowired
+    private BoardRepository boardRepository;
 
     @GetMapping(value="board/write")
     public String boardWriteForm(BoardTable board){
@@ -43,10 +56,7 @@ public class BoardController {
 
         User user = principalDetails.getUser();
 
-        board.setOwner(user.getId());
-        System.out.println(("제목 : "+board.getTitle()));
-        System.out.println(("내용 : "+board.getContent()));
-        System.out.println(("작성자 : "+board.getOwner()));
+        board.setAuthor(user);
         boardService.Write(board);
         model.addAttribute("message","글 작성이 완료되었습니다.");
         model.addAttribute("searchUrl","/board/list");
@@ -82,11 +92,26 @@ public class BoardController {
     }
 
     @GetMapping("/board/view")
-    public String boardView(Model model,Integer id){
+    public String boardView(Model model,Integer id,@AuthenticationPrincipal PrincipalDetails principalDetails){
         if(!AuthPage())
             return "redirect:/";
+        BoardTable board = boardService.boardView(id);
+        model.addAttribute("board",board);
+        List<Comment> comments = commentRepository.findByBoard(board);
+        model.addAttribute("comments", comments);
+        model.addAttribute("curComment",null);
 
-        model.addAttribute("board",boardService.boardView(id));
+        Long author = board.getAuthor().getId();
+        User user = principalDetails.getUser();
+        boolean isAuthor = author==user.getId()||user.getRole()== Role.ROLE_MANAGER||user.getRole()== Role.ROLE_ADMIN;
+        model.addAttribute("isAuthor", isAuthor);
+
+        Map<Integer, Boolean> commentAuthorMap = new HashMap<>();
+        for (Comment comment : comments) {
+            commentAuthorMap.put(comment.getId(), author==user.getId());
+        }
+        model.addAttribute("commentAuthorMap", commentAuthorMap);
+
         return "boardview";
     }
     @GetMapping("board/modify/{id}")
@@ -107,11 +132,14 @@ public class BoardController {
             return "redirect:/";
 
         BoardTable board = boardService.boardView(id);
-        Long Owner = board.getOwner();
+        Long author = board.getAuthor().getId();
         User user = principalDetails.getUser();
-        if(Owner==user.getId()||user.getRole()== Role.ROLE_MANAGER||user.getRole()== Role.ROLE_ADMIN)
+        if(author==user.getId()||user.getRole()== Role.ROLE_MANAGER||user.getRole()== Role.ROLE_ADMIN)
         {
-            System.out.println("게시글 권한 확인");
+            List<Comment> comments = commentRepository.findByBoard(board);
+            for (Comment comment : comments) {
+                commentRepository.delete(comment);
+            }
             boardService.boardDelete(id);
         }
 
@@ -128,7 +156,7 @@ public class BoardController {
         boardTemp.setContent(board.getContent());
 
         User user = principalDetails.getUser();
-        boardTemp.setOwner(user.getId());
+        boardTemp.setAuthor(user);
 
         boardService.Write(boardTemp);
         return "redirect:/board/list";
@@ -140,6 +168,86 @@ public class BoardController {
         return authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails;
     }
 
+    @PostMapping("board/view/{id}/post-comment")
+    public String addComment(@PathVariable Integer id, @RequestParam String content,@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Optional<BoardTable> boardOptional = boardRepository.findById(id);
+        if (boardOptional.isPresent()) {
+            BoardTable board = boardOptional.get();
+            User user = principalDetails.getUser();
+            Comment comment = new Comment();
+            comment.setBoard(board);
+            comment.setContent(content);
+            comment.setAuthor(user);
+            commentRepository.save(comment);
+        }
+        return "redirect:/board/view?id=" + id;
+    }
+    @GetMapping("board/view/{id}/modify-comment/{commentId}")
+    public String ReceiveComment( // 좀 지저분함
+            @PathVariable Integer id,
+            @PathVariable Integer commentId,
+            Model model,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ){
+        BoardTable board = boardService.boardView(id);
+        model.addAttribute("board",board);
+        List<Comment> comments = commentRepository.findByBoard(board);
+        model.addAttribute("comments", comments);
+        model.addAttribute("curComment",null);
+
+        Long author = board.getAuthor().getId();
+        User user = principalDetails.getUser();
+        boolean isAuthor = author==user.getId()||user.getRole()== Role.ROLE_MANAGER||user.getRole()== Role.ROLE_ADMIN;
+        model.addAttribute("isAuthor", isAuthor);
+
+        Map<Integer, Boolean> commentAuthorMap = new HashMap<>();
+        for (Comment comment : comments) {
+            commentAuthorMap.put(comment.getId(), author==user.getId());
+        }
+
+        model.addAttribute("commentAuthorMap", commentAuthorMap);
+        Comment comment = commentService.commentView(commentId);
+        model.addAttribute("curComment",isAuthor ?comment :null);
+
+
+        System.out.println(isAuthor);
+        return "boardview";
+    }
+    @PostMapping("board/view/{id}/modify-comment/{commentId}")
+    public String modifyComment(
+            @PathVariable Integer id,
+            @PathVariable Integer commentId,
+            @RequestParam String content,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Comment comment = commentService.commentView(commentId);
+
+        if (comment != null) {
+            User user = principalDetails.getUser();
+            Long author = comment.getAuthor().getId();
+            if (author.equals(user.getId()) || user.getRole() == Role.ROLE_MANAGER || user.getRole() == Role.ROLE_ADMIN) {
+                comment.setContent(content);
+                commentRepository.save(comment);
+            }
+        }
+
+        return "redirect:/board/view?id=" + id;
+    }
+    @GetMapping("board/view/{id}/delete-comment/{commentId}")
+    public String deleteComment(@PathVariable Integer id, @PathVariable Integer commentId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Comment comment = commentService.commentView(commentId);
+
+        if (comment != null) {
+            Long authorId = comment.getAuthor().getId();
+            User currentUser = principalDetails.getUser();
+
+            if (authorId.equals(currentUser.getId()) || currentUser.getRole() == Role.ROLE_MANAGER || currentUser.getRole() == Role.ROLE_ADMIN) {
+                commentRepository.delete(comment);
+            }
+        }
+
+        return "redirect:/board/view?id=" + id;
+    }
 }
 
 

@@ -5,7 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter @Setter @ToString
@@ -28,6 +28,12 @@ public class User {
 
     private String provider;    // oauth2를 이용할 경우 어떤 플랫폼을 이용하는지
     private String providerId;  // oauth2를 이용할 경우 아이디값
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
+    private List<BoardTable> boards;
+
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments;
 
     @Builder(builderClassName = "UserDetailRegister", builderMethodName = "userDetailRegister")
     public User(String username, String password, String email, Role role) {
