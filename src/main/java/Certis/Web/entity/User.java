@@ -5,7 +5,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter @ToString
@@ -13,12 +14,11 @@ import java.time.LocalDateTime;
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String username;
-
     private String password;
-
     private String email;
+    private Long coin;
+
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -29,6 +29,9 @@ public class User {
     private String provider;    // oauth2를 이용할 경우 어떤 플랫폼을 이용하는지
     private String providerId;  // oauth2를 이용할 경우 아이디값
 
+    @OneToMany(mappedBy = "user")
+    private List<UserProduct> purchasedProducts = new ArrayList<>();
+
     @Builder(builderClassName = "UserDetailRegister", builderMethodName = "userDetailRegister")
     public User(String username, String password, String email, Role role) {
         this.username = username;
@@ -38,12 +41,13 @@ public class User {
     }
 
     @Builder(builderClassName = "OAuth2Register", builderMethodName = "oauth2Register")
-    public User(String username, String password, String email, Role role, String provider, String providerId) {
+    public User(String username, String password, String email, Role role, String provider, String providerId, Long coin, Long price) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.role = role;
         this.provider = provider;
         this.providerId = providerId;
+        this.coin = coin;
     }
 }

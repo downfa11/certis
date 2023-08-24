@@ -15,6 +15,8 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     private User user;
     private Map<String, Object> attributes;
 
+    private Long coin;
+
     //UserDetails : Form 로그인 시 사용
     public PrincipalDetails(User user) {
         this.user = user;
@@ -87,5 +89,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     public void setUser(User user) {
         this.user = user;
     }
+
+
 }
 

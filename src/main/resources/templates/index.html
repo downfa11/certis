@@ -15,6 +15,7 @@
 
 <div sec:authorize="isAuthenticated()" style="padding:1em;">
     <button th:onclick="|location.href='@{user}'|">마이페이지</button>
+    <button th:onclick="|location.href='@{store}'|">상점</button>
     <form action="/logout" method="post">
         <button type="submit">로그아웃</button>
     </form>

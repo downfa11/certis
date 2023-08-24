@@ -29,10 +29,13 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         String username = provider+"_"+providerId;  			// 사용자가 입력한 적은 없지만 만들어준다
 
         String uuid = UUID.randomUUID().toString().substring(0, 6);
-        String password = bCryptPasswordEncoder.encode("패스워드"+uuid);  // 사용자가 입력한 적은 없지만 만들어준다
+        String password = bCryptPasswordEncoder.encode("password"+uuid);  // 사용자가 입력한 적은 없지만 만들어준다
 
         String email = oAuth2User.getAttribute("email");
+
         Role role = Role.ROLE_USER;
+
+        Long coin = 10L;
 
         User byUsername = userRepository.findByUsername(username);
 
@@ -40,12 +43,13 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         if(byUsername == null){
             byUsername = User.oauth2Register()
                     .username(username).password(password).email(email).role(role)
-                    .provider(provider).providerId(providerId)
+                    .provider(provider).providerId(providerId).coin(coin)
                     .build();
             userRepository.save(byUsername);
         }
 
         return new PrincipalDetails(byUsername, oAuth2User.getAttributes());
     }
+
 
 }

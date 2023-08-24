@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Store Page</title>
+</head>
+<body>
+    <h2>Store page</h2>
+    <hr>
+    <button th:onclick="|location.href='@{/}'|">홈으로</button>
+    <button th:onclick="|location.href='@{/enroll}'|">상품등록</button>
+    <div>
+        <p th:text="'소유 coin : ' + ${coin}"></p>
+    </div>
+
+    <div>
+        <form action="store"  method="POST">
+        <table>
+            <thead>
+            <tr>
+                <th>name</th>
+                <th>price</th>
+                <th>number</th>
+                <th>owner</th>
+                <th>구입</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.name}"></td>
+                <td th:text="${product.price}"></td>
+                <td th:text="${product.number}"></td>
+                <td th:text="${product.owner}"></td>
+                <td><button type="submit" name="product" th:value="${product.name}">구입</button></td>
+            </tr>
+            </tbody>
+        </table>
+        </form>
+    </div>
+</body>
+</html>
