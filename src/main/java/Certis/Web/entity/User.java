@@ -31,6 +31,11 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<UserProduct> purchasedProducts = new ArrayList<>();
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
+    private List<BoardTable> boards;
+
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments;
 
     @Builder(builderClassName = "UserDetailRegister", builderMethodName = "userDetailRegister")
     public User(String username, String password, String email, Role role) {

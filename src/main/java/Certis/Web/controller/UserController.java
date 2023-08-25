@@ -4,10 +4,13 @@ import Certis.Web.entity.UserProduct;
 import Certis.Web.repository.UserProductRepository;
 import Certis.Web.auth.PrincipalDetails;
 import Certis.Web.auth.PrincipalDetailsService;
+import Certis.Web.entity.BoardTable;
+import Certis.Web.entity.Comment;
 import Certis.Web.entity.Role;
 import Certis.Web.entity.User;
 import Certis.Web.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class UserController {
@@ -35,7 +40,6 @@ public class UserController {
 
         String encodePwd = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(encodePwd);
-
         userRepository.save(user);
         return "redirect:loginForm";
     }
