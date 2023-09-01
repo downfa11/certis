@@ -63,13 +63,29 @@ public class UserController {
     @GetMapping("/manager")
     public String manager(Authentication authentication, @AuthenticationPrincipal PrincipalDetails principalDetails, Model model){
         User user = principalDetails.getUser();
+        if (user.getRole() != Role.ROLE_MANAGER && user.getRole() != Role.ROLE_ADMIN) {
+            System.out.println("권한 : "+user.getRole());
+            return "redirect:/";
+        }
 
         model.addAttribute("email", user.getEmail());
         model.addAttribute("name", user.getUsername());
         model.addAttribute("coin", user.getCoin());
 
+        List<User> users = userRepository.findAll();
+        for(User user_ : users){
+            List<BoardTable> boards = user_.getBoards();
+            model.addAttribute("boards", boards);
 
-        return "manager";
+            /*List<Comment> comments = user_.getComments();
+            model.addAttribute("comments", comments);
+            for(Comment comment : comments){
+                //System.out.println("content : "+comment.getContent());
+            }*/
+        }
+
+        model.addAttribute("users", users);
+        return "manage";
     }
 
     @GetMapping("/admin")
@@ -82,5 +98,22 @@ public class UserController {
 
         return "admin";
     }
+    @PostMapping("/manage/toggle-admin/{userId}")
+    public ResponseEntity<?> toggleAdmin(@PathVariable Long userId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Optional<User> userOptional = userRepository.findById(userId);
 
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            if (user.getRole() == Role.ROLE_ADMIN)
+                return ResponseEntity.notFound().build();
+
+            user.setRole(user.getRole() == Role.ROLE_USER ? Role.ROLE_MANAGER : Role.ROLE_USER); // 권한 토글
+            userRepository.save(user);
+            System.out.println("권한 : " + user.getRole());
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

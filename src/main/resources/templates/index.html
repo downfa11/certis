@@ -7,7 +7,7 @@
 <h1>Main Page</h1>
 <hr>
 <h2>Welcome!</h2>
-<button th:onclick="|location.href='@{board}'|">게시판</button>
+<button th:onclick="|location.href='@{board/list}'|">게시판</button>
 
 <div sec:authorize="isAnonymous()">
     <button th:onclick="|location.href='@{loginForm}'|">로그인</button>

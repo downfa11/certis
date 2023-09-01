@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,6 +16,9 @@
 
 
 <body>
+<h1>Manager Page</h1>
+<hr>
+
 <div class="container">
     <div class="row mt-5">
         <p><h1> 관리자 페이지</h1></p>
@@ -23,6 +26,15 @@
     <br>
     <p>관리자 님 반갑습니다.</p>
 
+    <button th:onclick="|location.href='@{/}'|">홈으로</button>
+    <p sec:authentication="principal"></p>
+
+    <div sec:authorize="isAuthenticated()">
+
+        <p th:text="'User Email :' + ${email}"></p><br>
+        <p th:text="'name :' + ${name}"></p><br>
+
+    </div>
     <div class="row mt-5">
         <div class="col-12">
             <h3>●사용자 정보</h3>
@@ -36,6 +48,7 @@
                     <th scope="col">생성 시간</th>
                     <th scope="col">OAuth 플랫폼</th>
                     <th scope="col">OAuth 아이디</th>
+                    <th scope="col">잔액</th>
                     <th scope="col">작성한 게시글</th>
                     <th scope="col">작성한 댓글</th>
                     <th scope="col">삭제한 게시글</th>
@@ -52,7 +65,7 @@
                     <td th:text="${user.createTime}"></td>
                     <td th:text="${user.provider}"></td>
                     <td th:text="${user.providerId}"></td>
-
+                    <td th:text="${user.coin}"></td>
                     <td>
                         <ul th:if="${boards.size() > 0}">
                             <li th:each="board : ${boards}">
@@ -67,7 +80,7 @@
                     <td>삭제된 댓글 없음</td>
                     <td>
                         <button class="btn btn-primary" th:onclick="'javascript:toggleAdmin(' + ${user.id} + ');'">
-                            Admin
+                            auth
                         </button>
                     </td>
 
