@@ -32,7 +32,7 @@ jobs:
     - name: Setup MySQL
       uses: mirromutth/mysql-action@v1.1
       with:
-        host port: 3307
+          host port: 3307
           container port: 3307
           mysql database: 'test'
           mysql root password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
